@@ -109,13 +109,13 @@ export default function ClaimView({ claim, onClearClaim, showNotification, setVi
           <div>
             <div className="flex justify-between items-center mb-2">
               <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Post Title</label>
-              <button onClick={() => handleCopy(claim.post_content.title, 'title')} className="text-slate-400 hover:text-white">
+              <button onClick={() => handleCopy(claim.post_content?.title || '', 'title')} className="text-slate-400 hover:text-white">
                 {copiedField === 'title' ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
               </button>
             </div>
             <textarea
               readOnly
-              value={claim.post_content.title}
+              value={claim.post_content?.title || ''}
               className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none resize-none h-20"
             />
           </div>
@@ -123,20 +123,20 @@ export default function ClaimView({ claim, onClearClaim, showNotification, setVi
           <div>
             <div className="flex justify-between items-center mb-2">
               <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Post Body</label>
-              <button onClick={() => handleCopy(claim.post_content.body, 'body')} className="text-slate-400 hover:text-white">
+              <button onClick={() => handleCopy(claim.post_content?.body || '', 'body')} className="text-slate-400 hover:text-white">
                 {copiedField === 'body' ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
               </button>
             </div>
             <textarea
               readOnly
-              value={claim.post_content.body}
+              value={claim.post_content?.body || ''}
               className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none resize-y min-h-[150px]"
             />
           </div>
         </div>
 
         <div className="space-y-6">
-          {claim.post_content.note && (
+          {claim.post_content?.note && (
             <div>
               <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Instructions</label>
               <div className="bg-slate-950/50 border border-slate-800 rounded-lg p-4 text-slate-300 text-sm whitespace-pre-wrap">
@@ -145,7 +145,7 @@ export default function ClaimView({ claim, onClearClaim, showNotification, setVi
             </div>
           )}
 
-          {claim.post_content.hooks && claim.post_content.hooks.length > 0 && (
+          {claim.post_content?.hooks && claim.post_content.hooks.length > 0 && (
             <div>
               <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Hooks</label>
               <div className="space-y-2">
