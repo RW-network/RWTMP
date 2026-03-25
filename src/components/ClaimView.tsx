@@ -60,7 +60,7 @@ export default function ClaimView({ claim, onClearClaim, showNotification, setVi
   const handleRejectConfirm = async (reason: string) => {
     setShowRejectModal(false);
     try {
-      await apiFetch('/v1/reject', {
+      await apiFetch('/reject', {
         method: 'POST',
         body: JSON.stringify({ claim_id: claim.claim_id, reason })
       });
