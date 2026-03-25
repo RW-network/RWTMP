@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { apiFetch } from '../api';
 import { Copy, Check } from 'lucide-react';
@@ -26,6 +26,27 @@ export default function UsernameGate({ onLogin, showNotification }: UsernameGate
       const res = await apiFetch(`/accounts/${username}`);
       if (res.status === 'suspended') {
         setErrorMsg('Your account has been suspended. Contact your operator.');
+      } else if (res.status === 'pending') {
+        if (res.token) {
+          setToken(res.token);
+          setStep('token');
+        } else {
+          // Fallback if token isn't returned in GET
+          try {
+            const verifyRes = await apiFetch('/accounts/verify', {
+              method: 'POST',
+              body: JSON.stringify({ username })
+            });
+            if (verifyRes.token) {
+              setToken(verifyRes.token);
+              setStep('token');
+            } else {
+              setErrorMsg('Account is pending but no token was provided. Please contact support.');
+            }
+          } catch (vErr: any) {
+            setErrorMsg(vErr.data?.message || 'Failed to retrieve verification token.');
+          }
+        }
       } else {
         onLogin(username);
       }
@@ -37,19 +58,27 @@ export default function UsernameGate({ onLogin, showNotification }: UsernameGate
             method: 'POST',
             body: JSON.stringify({ username })
           });
-          if (verifyRes.status === 'pending' && verifyRes.token) {
+          if (verifyRes.token) {
             setToken(verifyRes.token);
             setStep('token');
           } else if (verifyRes.status === 'verified') {
              onLogin(username);
+          } else {
+            setErrorMsg(verifyRes.message || 'Failed to start verification.');
           }
         } catch (vErr: any) {
-          setErrorMsg(vErr.data?.message || 'Failed to start verification');
+          if (vErr.status === 409) {
+            setErrorMsg(vErr.data?.message || 'This username is already registered.');
+          } else if (vErr.status === 400) {
+            setErrorMsg(vErr.data?.message || 'Invalid request or account not eligible.');
+          } else {
+            setErrorMsg(vErr.data?.message || 'Failed to start verification.');
+          }
         }
       } else if (err.status === 403) {
         setErrorMsg('Your account has been suspended. Contact your operator.');
       } else {
-        setErrorMsg('An error occurred. Please try again.');
+        setErrorMsg(err.data?.message || 'An error occurred. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -72,7 +101,9 @@ export default function UsernameGate({ onLogin, showNotification }: UsernameGate
         setErrorMsg('Token not found in your bio yet. Make sure you saved your Reddit profile and try again.');
       }
     } catch (err: any) {
-      if (err.data?.error === 'not_eligible') {
+      if (err.status === 400) {
+        setErrorMsg(err.data?.message || 'Token not found in your bio yet. Make sure you saved your Reddit profile and try again.');
+      } else if (err.data?.error === 'not_eligible') {
         setErrorMsg(`Your account doesn't meet the requirements yet. ${err.data.post_karma ? `Post Karma: ${err.data.post_karma}` : ''}`);
       } else {
         setErrorMsg(err.data?.message || 'Verification failed. Try again.');
