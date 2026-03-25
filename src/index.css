@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #6366f1;
+}
+
+body {
+  background-color: #020617; /* slate-950 */
+  color: #cbd5e1; /* slate-300 */
+}

@@ -1,0 +1,5 @@
+{
+  "name": "Redwire Operator Template",
+  "description": "A self-hostable frontend template for operators of the Redwire platform.",
+  "requestFramePermissions": []
+}
