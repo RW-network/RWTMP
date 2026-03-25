@@ -15,6 +15,7 @@ export default function App() {
   const [notification, setNotification] = useState<{ msg: string; type: NotificationType } | null>(null);
 
   useEffect(() => {
+    document.title = import.meta.env.VITE_OPERATOR_NAME || 'Redwire Operator';
     const storedUser = localStorage.getItem('redwire_username');
     if (storedUser) {
       setUsername(storedUser);
