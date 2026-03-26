@@ -13,7 +13,7 @@ const RejectionModal: React.FC<{ isOpen: boolean, onClose: () => void, onSubmit:
         <textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="Reason..." className="w-full bg-slate-800 border border-slate-700 rounded p-3 text-white text-sm mb-4" rows={3} />
         <div className="flex justify-end gap-3">
           <button type="button" onClick={onClose} className="text-slate-400 hover:text-white text-sm font-bold px-3 py-2 rounded hover:bg-slate-800">Cancel</button>
-          <button type="button" onClick={(e) => { e.preventDefault(); onSubmit(reason); }} disabled={reason.length < 5} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-sm disabled:opacity-50 transition-colors">Confirm Rejection</button>
+          <button type="button" onClick={(e) => { e.preventDefault(); onSubmit(reason); }} disabled={reason.length < 10} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-sm disabled:opacity-50 transition-colors">Confirm Rejection</button>
         </div>
       </div>
     </div>
