@@ -23,7 +23,6 @@ export default function TaskBoard({ username, onClaimSuccess, showNotification }
   const fetchCampaigns = async () => {
     try {
       const data = await apiFetch('/campaigns');
-      // Assume data is array or { campaigns: [] }
       setCampaigns(Array.isArray(data) ? data : data.campaigns || []);
     } catch (err) {
       showNotification('Failed to load campaigns', 'error');
@@ -39,22 +38,34 @@ export default function TaskBoard({ username, onClaimSuccess, showNotification }
         method: 'POST',
         body: JSON.stringify({ campaign_id: campaignId, username, subreddit })
       });
-      
+
       const campaign = campaigns.find(c => c.id === campaignId);
+
       const enrichedClaim = {
-        ...campaign,
-        ...res,
-        post_content: res.post_content || campaign?.post_content,
-        campaign_id: campaignId
+        claim_id: res.claim_id,
+        expires_at: res.expires_at,
+        expiresAt: new Date(res.expires_at).getTime(),
+        campaign_id: campaignId,
+        subreddit,
+        payout: campaign?.payout ?? 0,
+        post_content: campaign?.post_content ?? null,
+        tier: campaign?.tier ?? null,
+        interaction_type: campaign?.interaction_type ?? 'post',
+        verificationPeriodDays: (campaign as any)?.verificationPeriodDays ?? 0,
+        flair: (campaign as any)?.flair ?? null,
+        image_url: (campaign as any)?.image_url ?? null,
+        nsfw: (campaign as any)?.nsfw ?? false,
+        first_comment: (campaign as any)?.first_comment ?? null,
+        targetPostUrl: (campaign as any)?.targetPostUrl ?? null,
       };
-      
+
       onClaimSuccess(enrichedClaim);
     } catch (err: any) {
       if (err.data?.error === 'no_slots_available') {
         showNotification('This slot was just taken. Try another.', 'error');
-        fetchCampaigns(); // refresh
+        fetchCampaigns();
       } else {
-        showNotification(err.data?.message || 'Failed to claim task', 'error');
+        showNotification(err.data?.error || err.data?.message || 'Failed to claim task', 'error');
       }
     } finally {
       setClaimingId(null);
@@ -106,10 +117,12 @@ export default function TaskBoard({ username, onClaimSuccess, showNotification }
             </span>
           </div>
 
-          <div className="mb-5">
-            <h4 className="text-white font-medium mb-1">{camp.post_content?.title}</h4>
-            <p className="text-slate-400 text-xs line-clamp-3">{camp.post_content?.body}</p>
-          </div>
+          {camp.post_content && (
+            <div className="mb-5">
+              <h4 className="text-white font-medium mb-1">{camp.post_content.title}</h4>
+              <p className="text-slate-400 text-xs line-clamp-3">{camp.post_content.body}</p>
+            </div>
+          )}
 
           {camp.subreddits.length === 1 ? (
             <button
@@ -118,10 +131,8 @@ export default function TaskBoard({ username, onClaimSuccess, showNotification }
               className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center"
             >
               {claimingId === `${camp.id}-${camp.subreddits[0]}` ? (
-                <div className="animate-spin border-white border-t-transparent rounded-full w-5 h-5 border-2"></div>
-              ) : (
-                'Claim Task'
-              )}
+                <div className="animate-spin border-white border-t-transparent rounded-full w-5 h-5 border-2" />
+              ) : 'Claim Task'}
             </button>
           ) : (
             <div className="grid grid-cols-2 gap-2">
@@ -134,7 +145,7 @@ export default function TaskBoard({ username, onClaimSuccess, showNotification }
                 >
                   <span>r/{sub}</span>
                   {claimingId === `${camp.id}-${sub}` && (
-                    <div className="animate-spin border-white border-t-transparent rounded-full w-3 h-3 border-2"></div>
+                    <div className="animate-spin border-white border-t-transparent rounded-full w-3 h-3 border-2" />
                   )}
                 </button>
               ))}
